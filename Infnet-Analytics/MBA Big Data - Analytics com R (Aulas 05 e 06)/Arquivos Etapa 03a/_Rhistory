@@ -1,0 +1,512 @@
+merged <- merge(Dados, TicketMedio_Bin, by.x = "Bin", by.y = "Bin", all = TRUE)
+library(rpart)
+library(rattle)
+library(RWeka) # Algoritmos J48 e PART.
+library(ipred) # Bagging.
+library(randomForest) # Random Forest.
+library(C50) # Algoritmo C50.
+fit <- ctree(Chargeback~Valor_Cat+Bin_Cat, data=merged)
+library(rpart)
+library(rattle)
+library(RWeka) # Algoritmos J48 e PART.
+library(ipred) # Bagging.
+library(randomForest) # Random Forest.
+library(C50) # Algoritmo C50.
+fit <- ctree(Chargeback~Valor_Cat+Bin_Cat, data=merged)
+fit <- J48(Chargeback~Valor_Cat+Bin_Cat, data=merged)
+summary(fit)
+predictions <- predict(fit, type="class")
+table(predictions, merged$Chargeback)
+plot(fit)
+fancyRpartPlot(fit)
+library(rworldmap)
+source('~/R/Etapa_2_7_(Geolocalização 2).R', echo=TRUE)
+source('~/R/Etapa_2_7_(Geolocalização 3).R', echo=TRUE)
+library(devtools)
+source('~/R/Etapa_2_7_(Geolocalização 4).R', echo=TRUE)
+source('~/R/Etapa_2_7_(Geolocalização 5).R', echo=TRUE)
+source('~/R/Etapa_2_8_(Regressão 1).R', echo=TRUE)
+source('~/R/Etapa_2_8_(Regressão 2).R', echo=TRUE)
+source('~/R/Etapa_2_8_(Regressão 3).R', echo=TRUE)
+source('~/R/Collect_Instagram_Data.R', echo=TRUE)
+source('~/R/Collect_Quandl_Data.R', echo=TRUE)
+source('~/R/Collect_Quandl_Data.R', echo=TRUE)
+install.packages("Quandl")
+source('~/R/Collect_Quandl_Data.R', echo=TRUE)
+source('~/.active-rstudio-document', echo=TRUE)
+source('~/R/Desafio_Stone.R', echo=TRUE)
+install.packages("ROSE")
+library(ROSE)
+data(hacide)
+str(hacide.train)
+table(hacide.train$cls)
+prop.table(table(hacide.train$cls))
+library(rpart)
+treeimb <- rpart(cls ~ ., data = hacide.train)
+pred.treeimb <- predict(treeimb, newdata = hacide.test)
+accuracy.meas(hacide.test$cls, pred.treeimb[,2])
+roc.curve(hacide.test$cls, pred.treeimb[,2], plotit = F)
+data_balanced_over <- ovun.sample(cls ~ ., data = hacide.train, method = "over",
+N = 1960)$data
+View(data_balanced_over)
+View(data_balanced_over)
+table(data_balanced_over$cls)
+data_balanced_under <- ovun.sample(cls ~ ., data = hacide.train, method = "under", N = 40, seed = 1)$data
+table(data_balanced_under$cls)
+data_balanced_both <- ovun.sample(cls ~ ., data = hacide.train, method = "both", p=0.5,                             N=1000, seed = 1)$data
+table(data_balanced_both$cls)
+data.rose <- ROSE(cls ~ ., data = hacide.train, seed = 1)$data
+table(data.rose$cls)
+View(data.rose)
+View(data.rose)
+tree.rose <- rpart(cls ~ ., data = data.rose)
+tree.over <- rpart(cls ~ ., data = data_balanced_over)
+tree.under <- rpart(cls ~ ., data = data_balanced_under)
+tree.both <- rpart(cls ~ ., data = data_balanced_both)
+pred.tree.rose <- predict(tree.rose, newdata = hacide.test)
+pred.tree.over <- predict(tree.over, newdata = hacide.test)
+pred.tree.under <- predict(tree.under, newdata = hacide.test)
+pred.tree.both <- predict(tree.both, newdata = hacide.test)
+roc.curve(hacide.test$cls, pred.tree.rose[,2])
+roc.curve(hacide.test$cls, pred.tree.over[,2])
+roc.curve(hacide.test$cls, pred.tree.under[,2])
+roc.curve(hacide.test$cls, pred.tree.both[,2])
+ROSE.holdout <- ROSE.eval(cls ~ ., data = hacide.train, learner = rpart, method.assess = "holdout", extr.pred = function(obj)obj[,2], seed = 1)
+ROSE.holdout
+View(merged)
+View(merged)
+source('~/R/Desafio_Stone.R', echo=TRUE)
+View(merged)
+View(merged)
+Dados_Modelo <- within(merged, rm(IncomingChargeback, Valor_Cat))
+View(Dados_Modelo)
+View(Dados_Modelo)
+prop.table(table(Dados_Modelo$Chargeback))
+library(rpart)
+library(rpart)
+arvore_desb <- rpart(Chargeback ~ ., data = Dados_Modelo)
+pred.arvore_desb <- predict(arvore_desb, newdata = Dados_Modelo)
+accuracy.meas(arvore_desb$Chargeback, pred.arvore_desb[,2])
+set.seed(54321)
+ind <- sample(2, nrow(Dados_Modelo), replace=TRUE, prob=c(0.7, 0.3))
+trainData <- Dados_Modelo[ind==1,]
+testData <- Dados_Modelo[ind==2,]
+arvore_desb <- rpart(Chargeback ~ ., data = trainData)
+pred.arvore_desb <- predict(arvore_desb, newdata = trainData)
+accuracy.meas(testData$Chargeback, pred.arvore_desb[,2])
+arvore_desb <- rpart(Chargeback ~ ., data = trainData)
+pred.arvore_desb <- predict(arvore_desb, newdata = testData)
+accuracy.meas(testData$Chargeback, pred.arvore_desb[,2])
+roc.curve(testData$Chargeback, pred.arvore_desb[,2], plotit = F)
+table(Dados_Modelo$Chargeback)
+table(trainData$Chargeback)
+table(testData$Chargeback)
+data_balanced_over <- ovun.sample(cls ~ ., data = trainData, method = "over",
+N = (50085*2))$data
+data_balanced_over <- ovun.sample(Chargeback ~ ., data = trainData, method = "over",
+N = (50085*2))$data
+table(data_balanced_over$cls)
+table(data_balanced_over$Chargeback)
+data_balanced_under <- ovun.sample(Chargeback ~ ., data = trainData, method = "under",
+N = (223*2), seed = 1)$data
+table(data_balanced_under$Chargeback)
+data_balanced_both <- ovun.sample(Chargeback ~ ., data = trainData, method = "both", p=0.5,                             N=1000, seed = 1)$data
+table(data_balanced_both$Chargeback)
+data_balanced_both <- ovun.sample(Chargeback ~ ., data = trainData, method = "both",
+p=0.5, N=50308, seed = 1)$data
+View(data_balanced_both)
+View(data_balanced_both)
+table(data_balanced_both$Chargeback)
+data_rose <- ROSE(Chargeback ~ ., data = trainData, seed = 1)$data
+str(trainData)
+View(data_balanced_under)
+View(data_balanced_under)
+Dados_Modelo <- within(merged, rm(Data, IncomingChargeback, Valor_Cat))
+table(Dados_Modelo$Chargeback)
+prop.table(table(Dados_Modelo$Chargeback))
+set.seed(54321)
+ind <- sample(2, nrow(Dados_Modelo), replace=TRUE, prob=c(0.7, 0.3))
+trainData <- Dados_Modelo[ind==1,]
+testData <- Dados_Modelo[ind==2,]
+table(trainData$Chargeback)
+table(testData$Chargeback)
+library(rpart)
+arvore_desb <- rpart(Chargeback ~ ., data = trainData)
+pred.arvore_desb <- predict(arvore_desb, newdata = testData)
+accuracy.meas(testData$Chargeback, pred.arvore_desb[,2])
+roc.curve(testData$Chargeback, pred.arvore_desb[,2], plotit = F)
+data_balanced_over <- ovun.sample(Chargeback ~ ., data = trainData, method = "over",
+N = (50085*2))$data
+table(data_balanced_over$Chargeback)
+data_balanced_under <- ovun.sample(Chargeback ~ ., data = trainData, method = "under",
+N = (223*2), seed = 1)$data
+table(data_balanced_under$Chargeback)
+data_balanced_both <- ovun.sample(Chargeback ~ ., data = trainData, method = "both",
+p=0.5, N=50308, seed = 1)$data
+table(data_balanced_both$Chargeback)
+data_rose <- ROSE(Chargeback ~ ., data = trainData, seed = 1)$data
+View(data_rose)
+View(data_rose)
+View(df)
+View(df)
+table(data.rose$cls)
+table(data_rose$Chargeback)
+data_rose$Valor <- abs(data_rose$Valor)
+View(data_rose)
+View(data_rose)
+summary(data_rose)
+tree.rose <- rpart(Chargeback ~ ., data = data_rose)
+tree.over <- rpart(Chargeback ~ ., data = data_balanced_over)
+tree.under <- rpart(Chargeback ~ ., data = data_balanced_under)
+tree.both <- rpart(Chargeback ~ ., data = data_balanced_both)
+pred.tree.rose <- predict(tree.rose, newdata = testData)
+pred.tree.over <- predict(tree.over, newdata = testData)
+pred.tree.under <- predict(tree.under, newdata = testData)
+pred.tree.both <- predict(tree.both, newdata = testData)
+roc.curve(hacide.test$cls, pred.tree.rose[,2])
+roc.curve(hacide.test$Chargeback, pred.tree.rose[,2])
+roc.curve(testData$Chargeback, pred.tree.rose[,2])
+roc.curve(testData$Chargeback, pred.tree.over[,2])
+roc.curve(testData$Chargeback, pred.tree.under[,2])
+roc.curve(testData$Chargeback, pred.tree.both[,2])
+data_rose <- ROSE(Chargeback ~ ., data = trainData, seed = 1)$data
+table(data_rose$Chargeback)
+tree.rose <- rpart(Chargeback ~ ., data = data_rose)
+pred.tree.rose <- predict(tree.rose, newdata = testData)
+roc.curve(testData$Chargeback, pred.tree.rose[,2])
+roc.curve(testData$Chargeback, pred.tree.over[,2])
+roc.curve(testData$Chargeback, pred.tree.under[,2])
+roc.curve(testData$Chargeback, pred.tree.both[,2])
+hc <- hclust(dist(trainData), method="ave")
+hc <- hclust(dist(testData), method="ave")
+plot(hc, hang = -1, labels=trainData$Chargeback[idx])
+library(rpart)
+library(rattle)
+library(RWeka) # Algoritmos J48 e PART.
+library(ipred) # Bagging.
+library(randomForest) # Random Forest.
+library(C50) # Algoritmo C50.
+fit <- J48(Chargeback~Valor_Cat+Bin_Cat, data=trainData)
+View(trainData)
+View(trainData)
+fit <- J48(Chargeback~Valor+Bin_Cat+Ticket_Medio, data=trainData)
+summary(fit)
+fit <- J48(Chargeback~Valor+Bin_Cat+Ticket_Medio, data=data_rose)
+summary(fit)
+predictions <- predict(testData, type="class")
+predictions <- predict(fit, type="class")
+table(predictions, merged$Chargeback)
+predictions <- predict(testData, type="class")
+predictions <- predict(fit, type="class")
+table(predictions, testData$Chargeback)
+table(predictions, trainData$Chargeback)
+plot(fit)
+fancyRpartPlot(fit)
+summary(fit)
+print(fit)
+fancyRpartPlot(fit)
+accuracy.meas(testData$Chargeback, pred.tree.rose[,2])
+accuracy.meas(testData$Chargeback, pred.tree.over[,2])
+accuracy.meas(testData$Chargeback, pred.tree.under[,2])
+accuracy.meas(testData$Chargeback, pred.tree.both[,2])
+fit_lm <- lm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = trainData)
+fit_lm
+summary(fit_lm)
+summary(trainData)
+hist(resid(fit_lm), main="Histograma dos resíduos",
+xlab="Resíduos")
+fit_lm <- lm(Chargeback~Valor+Bin+Ticket_Medio, data = trainData)
+trainData$Bin_Cat <- as.numeric(trainData$Bin_Cat)
+fit_lm <- lm(Chargeback~Valor+Bin+Ticket_Medio, data = trainData)
+fit_lm <- lm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = trainData)
+fit_lm <- lm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = trainData)
+summary(trainData)
+set.seed(54321)
+ind <- sample(2, nrow(Dados_Modelo), replace=TRUE, prob=c(0.7, 0.3))
+trainData <- Dados_Modelo[ind==1,]
+testData <- Dados_Modelo[ind==2,]
+table(trainData$Chargeback)
+table(testData$Chargeback)
+train_lm <- trainData
+train_lm <- trainData
+train_lm$Bin_Cat <- as.numeric(train_lm$Bin_Cat)
+summary(trainData)
+summary(train_lm)
+train_lm$Chargeback <- as.numeric(train_lm$Chargeback)
+summary(train_lm)
+fit_lm <- lm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = trainData)
+fit_lm <- lm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = train_lm)
+fit_lm
+summary(fit_lm)
+hist(resid(fit_lm), main="Histograma dos resíduos",
+xlab="Resíduos")
+shapiro.test(resid(fit_lm))
+plot(model1, which=c(2,2))
+plot(fit_lm, which=c(2,2))
+train_glm <- trainData
+train_glm$Bin_Cat <- as.numeric(train_glm$Bin_Cat)
+train_glm$Chargeback <- as.numeric(train_glm$Chargeback)
+train_glm <- trainData
+train_glm$Bin_Cat <- as.numeric(train_glm$Bin_Cat)
+train_glm$Chargeback <- as.numeric(train_glm$Chargeback)
+summary(train_glm)
+fit_glm <- glm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = train_lm, family=binomial)
+train_glm$Chargeback[train_glm$Chargeback = 2] <- 0
+train_glm$Chargeback[train_glm$Chargeback == 2] <- 0
+summary(train_glm)
+fit_glm <- glm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = train_lm, family=binomial)
+train_glm$Bin_Cat[train_glm$Bin_Cat == 2] <- 0
+summary(train_glm)
+fit_glm <- glm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = train_lm, family=binomial)
+fit_glm <- glm(Chargeback~Valor+Bin_Cat+Ticket_Medio, data = train_glm, family=binomial)
+fit_glm
+summary(fit_lm)
+summary(fit_glm)
+hist(resid(fit_glm), main="Histograma dos resíduos",
+xlab="Resíduos")
+shapiro.test(resid(fit_glm))
+plot(fit_glm, which=c(2,2))
+install.packages(“class”)
+install.packages('class')
+install.packages("class")
+library(class)
+dados_test_pred <- knn(train = trainData, test = testData, k=10)
+dados_test_pred <- knn(train = trainData, test = testData, cl = trainData$Chargeback, k=10)
+dados_test_pred <- knn(train = trainData, test = testData, cl = trainData$Chargeback, k=3)
+dados_train_labels <- trainData$Chargeback
+dados_test_labels <- testData$Chargeback
+dados_test_pred <- knn(train = trainData, test = testData, cl = dados_train_labels, k=3)
+Dados_clust <- <- within(Dados_Modelo, rm(Chargeback))
+Dados_clust <- within(Dados_Modelo, rm(Chargeback))
+View(Dados_clust)
+View(Dados_clust)
+(kmeans.result <- kmeans(Dados_clust, 2))
+Dados_clust$Bin_Cat <- as.numeric(Dados_clust$Bin_Cat)
+(kmeans.result <- kmeans(Dados_clust, 2))
+table(Dados_Modelo$Chargeback, kmeans.result$cluster)
+View(Dados_clust)
+View(Dados_clust)
+plot(Dados_clust[c("Valor", "Bin")],
+col = kmeans.result$cluster)
+points(kmeans.result$centers[,c("Valor",
+"Bin")], col=1:3, pch=8, cex=2)
+plot(Dados_clust[c("Bin", "Valor")],
+col = kmeans.result$cluster)
+points(kmeans.result$centers[,c("Bin",
+"Valor")], col=1:3, pch=8, cex=2)
+plot(Dados_clust[c("Bin_Cat", "Valor")],
+col = kmeans.result$cluster)
+points(kmeans.result$centers[,c("Bin_Cat",
+"Valor")], col=1:3, pch=8, cex=2)
+plot(Dados_clust[c("Ticket_Medio", "Valor")],
+col = kmeans.result$cluster)
+points(kmeans.result$centers[,c("Ticket_Medio",
+"Valor")], col=1:3, pch=8, cex=2)
+library(data.table)
+train <- fread("train.csv",na.strings = c("","","?","NA",NA))
+test <- fread("test.csv",na.strings = c("","","?","NA",NA))
+dim(train); str (train); View(train)
+source('~/R/Desafio_Stone.R', echo=TRUE)
+library(ROSE)
+source('~/R/Desafio_Stone.R', echo=TRUE)
+5+5
+10-5
+43*12,5
+43*12.5
+14/7
+21/45
+34/0
+source('~/.active-rstudio-document', echo=TRUE)
+plot(1:10)
+q()
+val_x <- 15
+plot(1:val_x)
+source('~/.active-rstudio-document', encoding = 'UTF-8', echo=TRUE)
+source('~/.active-rstudio-document', encoding = 'UTF-8', echo=TRUE)
+search()
+install.packages("dplyr")
+remove.packages(dplyr)
+remove.packages("dplyr")
+install.packages("dplyr")
+search()
+library(ggplot2)
+library(reshape2)
+setAs("character","myDate", function(from) as.Date(from, format="%d/%m/%Y") )
+dados <- read.csv("Dados/PETR4_VALE5.csv", colClasses=c('myDate','numeric','numeric'),  header = TRUE, sep = ";", dec = ",")
+dados <- read.csv("PETR4_VALE5.csv", colClasses=c('myDate','numeric','numeric'),  header = TRUE, sep = ";", dec = ",")
+meltdados <- melt(dados,id="Date")
+ggplot(meltdados,aes(x=Date,y=value,colour=variable,group=variable)) + geom_line() + theme(axis.text.x = element_text(angle=90, hjust=1))
+source('~/.active-rstudio-document', encoding = 'UTF-8', echo=TRUE)
+x <- c(1)
+class(x)
+x <- c(1, 2)
+class(x)
+x <- c(1, 2, 3L)
+class(x)
+x <- c(1, 2, 3L, 4i)
+class(x)
+View(test)
+View(test)
+5+5
+5+5
+10-5
+10-20
+3*15
+43*12.5 #(Atenção com o separador decimal!
+14/7
+21/45
+34/0
+plot(1:10)
+val_x <- 15
+plot(1:val_x)
+?plot
+help(plot)
+View(test)
+View(train)
+help(plot)
+help.search("normal")
+library(ggplot2)
+library(reshape2)
+setAs("character","myDate", function(from) as.Date(from, format="%d/%m/%Y") )
+dados <- read.csv("PETR4_VALE5.csv", colClasses=c('myDate','numeric','numeric'),  header = TRUE, sep = ";", dec = ",")
+View(dados)
+meltdados <- melt(dados,id="Date")
+ggplot(meltdados,aes(x=Date,y=value,colour=variable,group=variable)) + geom_line() + theme(axis.text.x = element_text(angle=90, hjust=1))
+ggplot(dados,aes(x=Date,y=value,colour=variable,group=variable)) + geom_line() + theme(axis.text.x = element_text(angle=90, hjust=1))
+meltdados
+ggplot(meltdados,aes(x=Date,y=value,colour=variable,group=variable)) + geom_line() + theme(axis.text.x = element_text(angle=90, hjust=1))
+setwd("D:/Dropbox/01 - Infnet/73 - Big Data Analytics (MBA)/2017 (T2 - Sábados)/Arquivos Etapa 02b")
+x <- c(1, 2, 3, 4)
+x * c(2, 3)
+x * c(2, 3, 1)
+x <- c()
+x <- c(1, 2, 3, 4)
+y <- c()
+x*y
+sin(pi) # Seno
+x <- c(1,2,-3, 4, -20.3)
+mean(x) # Média
+sum(x) # Somatório
+prod(x) # Produtório
+cumsum(x) # Somatório acumulado
+cumprod(x) # Produtório acumulado
+identical(sin(pi), 0)
+setwd("D:/Dropbox/01 - Infnet/73 - Big Data Analytics (MBA)/2017 (T2 - Sábados)/Arquivos Etapa 03a")
+set.seed(54321)
+x <- matrix(rnorm(9), ncol = 3)
+apply(x, 1, mean)
+apply(x, 2, mean)
+lista_de_matrizes <- list(x = x, tx = t(x))
+lapply(lista_de_matrizes, solve)
+lapply(lista_de_matrizes, solve)
+lapply(lista_de_matrizes, det)
+sapply(lista_de_matrizes, det)
+sims <- replicate(100000, mean(rnorm(100)))
+hist(sims, col = "lightblue")
+x1 <- rnorm(100)
+x2 <- rnorm(100)
+mapply(mean, x = list(x1, x2), trim = list(0.1, 0.2))
+sapply(lista_de_matrizes, det)
+lapply(lista_de_matrizes, det)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+clear
+cls
+set.seed(54321)
+x <- matrix(rnorm(9), ncol = 3)
+apply(x, 1, mean)
+apply(x, 2, mean)
+l
+lista_de_matrizes <- list(x = x, tx = t(x))
+lapply(lista_de_matrizes, solve)
+lapply(lista_de_matrizes, det)
+sapply(lista_de_matrizes, det)
+sims <- replicate(1000, mean(rnorm(100)))
+sims <- replicate(1000, mean(rnorm(100)))
+set.seed(54321)
+sims <- replicate(1000, mean(rnorm(100)))
+set.seed(54321)
+sims <- replicate(1000, mean(rnorm(100)))
+sims <- replicate(1000, mean(rnorm(100)))
+hist(sims, col = "lightblue")
+sims <- replicate(1000, mean(rnorm(100)))
+sims <- replicate(1000, mean(rnorm(100)))
+set.seed(1)
+sims <- replicate(1000, mean(rnorm(100)))
+set.seed(1)
+sims <- replicate(1000, mean(rnorm(100)))
+hist(sims, col = "lightblue")
+set.seed(54321)
+x1 <- rnorm(100)
+x2 <- rnorm(100)
+mapply(mean, x = list(x1, x2), trim = list(0.1, 0.2))
+dados <- read.csv2("Housing_Dataset.csv")
+dados <- read.csv2("Housing_Dataset.csv")
+View(dados)
+View(dados)
+View(dados)
+dados$pm2 <- dados$preco/dados$m2
+View(dados)
+View(dados)
+dados$pm2_2 <- with(dados, preco/m2)
+View(dados)
+str(dados)
+subconjunto <- subset(dados, bairro == "Bairro_D", select=c(bairro, preco))
+View(subconjunto)
+View(subconjunto)
+selecao <- with(dados, tipo=="venda" & preco > 1000000)
+sum(selecao) # quantos imóveis?
+venda_maior1m <- dados[selecao,]
+View(venda_maior1m)
+View(venda_maior1m)
+venda_maior1m_2 <- subset(dados, tipo == "venda" & preco > 1e6)
+dados$m2_cat <- cut(dados$m2,
+breaks= c(0, 50, 150, 200, 250, Inf),
+labels=c("de 0 a 50 m2", "de 50 a 150 m2",
+"de 150 a 200 m2","de 200 a 250 m2",
+"mais de 250 m2") )
+View(dados)
+View(dados)
+View(dados)
+View(dados)
+aluguel <- unicos[unicos$tipo == "aluguel", ]
+unicos <- na.omit(dados)
+aluguel <- unicos[unicos$tipo == "aluguel", ]
+venda <- unicos[unicos$tipo == "venda", ]
+media_aluguel <- mean(aluguel$preco)
+media_venda <- mean(venda$preco)
+medias = c(aluguel = media_aluguel, venda = media_venda)
+medias
+tapply(X = unicos$preco, INDEX = unicos$tipo, FUN = mean)
+aggregate(x = list(media = unicos$preco), by = list(tipo = unicos$tipo),
+FUN = mean)
+library(dplyr)
+unicos %>% group_by(tipo) %>% summarise(media = mean(preco))
+alug_venda <- split(unicos$preco, unicos$tipo)
+medias_2 <- lapply(alug_venda, mean)
+medias_2
+unlist(medias_2)
+sapply(alug_venda, mean)
+lapply(alug_venda, summary)
+ok.venda <- with(unicos, tipo == "venda" &
+pm2 > 3000 &
+pm2 < 20000)
+ok.aluguel <- with(unicos, tipo == "aluguel" &
+pm2 > 25 &
+pm2 < 100)
+ok <- (ok.venda | ok.aluguel)
+outliers <- unicos[!ok,]
+limpos <- unicos[ok,]
+tapply(unicos$pm2, unicos$tipo, median)
+tapply(unicos$pm2, list(unicos$bairro, unicos$tipo), median)
+tabelas <- tapply(unicos$pm2, list(unicos$imovel, unicos$tipo, unicos$bairro), median)
+str(tabelas)
+tabelas[ , ,"Bairro_K"]
+"venda"
+tabelas[ ,"venda", ]
+aps <- unicos[unicos$imovel == "apartamento", ]
+aps2 <- limpos[limpos$imovel == "apartamento", ]
+with(aps2, tapply(pm2, m2_cat, median))
+with(aps2, tapply(pm2, quartos, median))
+with(aps2, tapply(quartos, list(m2_cat, quartos), length))

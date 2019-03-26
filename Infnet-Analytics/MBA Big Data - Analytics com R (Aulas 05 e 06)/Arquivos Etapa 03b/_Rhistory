@@ -1,0 +1,512 @@
+View(iris.som)
+View(iris.som)
+######################################################################
+###Chapter 2 - Introduction to Neural Networks - using R    ##########
+###Usuervised ML technique using Kohonen package  ####################
+######################################################################
+# Instalando pacotes.
+install.packages("kohonen")
+# Carregando os pacotes.
+library("kohonen")
+# Avaliando os dados.
+data("wines")
+str(wines)
+head(wines)
+View (wines)
+# Garantindo a reproducibilidade
+set.seed(1)
+# Aplicando o modelo de Kohonen.
+som.wines = som(scale(wines), grid = somgrid(5, 5, "hexagonal"))
+som.wines
+dim(getCodes(som.wines))
+# Instalando pacotes.
+#install.packages("kohonen")
+# Carregando os pacotes.
+library("kohonen")
+# Avaliando os dados.
+data("wines")
+str(wines)
+head(wines)
+View (wines)
+# Garantindo a reproducibilidade
+set.seed(1)
+# Aplicando o modelo de Kohonen.
+som.wines = som(scale(wines), grid = somgrid(5, 5, "hexagonal"))
+som.wines
+dim(getCodes(som.wines))
+# Usando o modelo para previsão.
+# Kohonen supervisionado.
+training = sample(nrow(wines), 150)
+Xtraining = scale(wines[training, ])
+Xtest = scale(wines[-training, ],
+center = attr(Xtraining, "scaled:center"),
+scale = attr(Xtraining, "scaled:scale"))
+trainingdata = list(measurements = Xtraining,
+vintages = vintages[training])
+testdata = list(measurements = Xtest, vintages = vintages[-training])
+mygrid = somgrid(5, 5, "hexagonal")
+som.wines = supersom(trainingdata, grid = mygrid)
+# Gerando uma Matriz de Confusão.
+som.prediction = predict(som.wines, newdata = testdata)
+table(vintages[-training], som.prediction$predictions[["vintages"]])
+plot(som.wines, main = "Wine data Kohonen SOM")
+par(mfrow = c(1, 1))
+plot(som.wines, type = "changes", main = "Wine data: SOM")
+plot(som.wines, main = "Wine data Kohonen SOM")
+# Usando o modelo para previsão.
+# Kohonen supervisionado.
+training = sample(nrow(wines), 150)
+Xtraining = scale(wines[training, ])
+Xtest = scale(wines[-training, ],
+center = attr(Xtraining, "scaled:center"),
+scale = attr(Xtraining, "scaled:scale"))
+trainingdata = list(measurements = Xtraining,
+vintages = vintages[training])
+testdata = list(measurements = Xtest, vintages = vintages[-training])
+mygrid = somgrid(5, 5, "hexagonal")
+som.wines = supersom(trainingdata, grid = mygrid)
+# Gerando uma Matriz de Confusão.
+som.prediction = predict(som.wines, newdata = testdata)
+table(vintages[-training], som.prediction$predictions[["vintages"]])
+######################################################################
+# Carregando pacotes
+library(keras)
+# Carregando a base e dividindo os conjuntos de teste e treinamento.
+# Temos os dados divididos em imagens e etiquetas.
+mnist <- dataset_mnist()
+# Carregando pacotes
+library(keras)
+# Carregando a base e dividindo os conjuntos de teste e treinamento.
+# Temos os dados divididos em imagens e etiquetas.
+mnist <- dataset_mnist()
+# Instalando pacotes (necessário uma única vez apenas!).
+#install.packages("keras")
+install_keras()
+# Keras - Exemplo 02 - Análises de filmes
+# Vamos resolver o problema de classificar análises de filmes, como um
+# exemplo de classificação binária.
+# Vamos classificar as análises em 'positivas' ou 'negativas'.
+# O Dataset já vem com o pacote Keras.
+# O Dataset chama-se 'IMDB Dataset' e contém 50.000 análises, meio-a-meio.
+# Carregando pacotes.
+library(keras)
+# Carregando o dataset (80MB)
+# O argumento 'num_words' especifica que queremos manter apenas palavras mais
+#       frequentes nas análises, descartando palavras esparsas.
+# 'train_data' e 'test_data' são listas de análises,
+#        cada uma como uma lista de índices de palavras
+#        (codifica uma sequência de palavras).
+# 'train_labels' e 'test_labels' são lista de 0s('negativo') e 1s ('positivo').
+imdb <- dataset_imdb(num_words = 10000)
+c(c(train_data, train_labels), c(test_data, test_labels)) %<-% imdb
+# Olhando as bases.
+str(train_data[[1]])
+train_labels[[1]]
+# Vamos ver como decodificar as análises.
+# 'word_index' é um dicionário que mapeia palavras em inteiros.
+word_index <- dataset_imdb_word_index()
+# Mapeando índices em palavras (revertendo o índice).
+reverse_word_index <- names(word_index)
+names(reverse_word_index) <- word_index
+# Decodificando. Os índices são 'shiftados' 3 posições pois os três
+#      primeiros têm funções especiais.
+decoded_review <- sapply(train_data[[1]], function(index) {
+word <- if (index >= 3) reverse_word_index[[as.character(index - 3)]]
+if (!is.null(word)) word else "?"
+})
+# Apresentando uma análise decodificada.
+cat(decoded_review)
+# Não podemos alimentar a rede com listas de inteiros.
+# Vamos então transformar as listas em tensores.
+# Aqui, vamos tilizar uma técnica chamada 'One-hot-encode', que transforma
+#      as listas em vetores de 0s e 1s. Teremos então vetores onde todos
+#      os índices serão zero, exceto os índices desejados, que serão representados por 1.
+vectorize_sequences <- function(sequences, dimension = 10000) {
+# Criando uma matrix zerada de tamanho (len(sequences), dimension)
+results <- matrix(0, nrow = length(sequences), ncol = dimension)
+for (i in 1:length(sequences))
+# Configurando os índices desejados de results[i] em 1s.
+results[i, sequences[[i]]] <- 1
+results
+}
+# Vetorizando o conjunto de treinamento.
+x_train <- vectorize_sequences(train_data)
+# Vetorizando o conjunto de testes.
+x_test <- vectorize_sequences(test_data)
+# Olhando o resultado final.
+str(x_train[1,])
+# finalmente, vetorizando as etiquetas.
+y_train <- as.numeric(train_labels)
+y_test <- as.numeric(test_labels)
+# Construindo o modelo.
+model <- keras_model_sequential() %>%
+layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>%
+layer_dense(units = 16, activation = "relu") %>%
+layer_dense(units = 1, activation = "sigmoid")
+# Configurando a rede.
+model %>% compile(
+optimizer = "rmsprop",
+loss = "binary_crossentropy",
+metrics = c("accuracy")
+)
+# Keras - Exemplo 02 - Análises de filmes
+# Vamos resolver o problema de classificar análises de filmes, como um
+# exemplo de classificação binária.
+# Vamos classificar as análises em 'positivas' ou 'negativas'.
+# O Dataset já vem com o pacote Keras.
+# O Dataset chama-se 'IMDB Dataset' e contém 50.000 análises, meio-a-meio.
+# Carregando pacotes.
+library(keras)
+# Definindo o parâmetro de palavras mais frequentes.
+freq = 10000
+# Carregando o dataset (80MB)
+# O argumento 'num_words' especifica que queremos manter apenas palavras mais
+#       frequentes nas análises, descartando palavras esparsas.
+# 'train_data' e 'test_data' são listas de análises,
+#        cada uma como uma lista de índices de palavras
+#        (codifica uma sequência de palavras).
+# 'train_labels' e 'test_labels' são lista de 0s('negativo') e 1s ('positivo').
+imdb <- dataset_imdb(num_words = freq)
+c(c(train_data, train_labels), c(test_data, test_labels)) %<-% imdb
+# Olhando as bases.
+str(train_data[[1]])
+train_labels[[1]]
+# Vamos ver como decodificar as análises.
+# 'word_index' é um dicionário que mapeia palavras em inteiros.
+word_index <- dataset_imdb_word_index()
+# Mapeando índices em palavras (revertendo o índice).
+reverse_word_index <- names(word_index)
+names(reverse_word_index) <- word_index
+# Decodificando. Os índices são 'shiftados' 3 posições pois os três
+#      primeiros têm funções especiais.
+decoded_review <- sapply(train_data[[1]], function(index) {
+word <- if (index >= 3) reverse_word_index[[as.character(index - 3)]]
+if (!is.null(word)) word else "?"
+})
+# Apresentando uma análise decodificada.
+cat(decoded_review)
+# Não podemos alimentar a rede com listas de inteiros.
+# Vamos então transformar as listas em tensores.
+# Aqui, vamos tilizar uma técnica chamada 'One-hot-encode', que transforma
+#      as listas em vetores de 0s e 1s. Teremos então vetores onde todos
+#      os índices serão zero, exceto os índices desejados, que serão representados por 1.
+vectorize_sequences <- function(sequences, dimension = freq) {
+# Criando uma matrix zerada de tamanho (len(sequences), dimension)
+results <- matrix(0, nrow = length(sequences), ncol = dimension)
+for (i in 1:length(sequences))
+# Configurando os índices desejados de results[i] em 1s.
+results[i, sequences[[i]]] <- 1
+results
+}
+# Vetorizando o conjunto de treinamento.
+x_train <- vectorize_sequences(train_data)
+# Vetorizando o conjunto de testes.
+x_test <- vectorize_sequences(test_data)
+# Olhando o resultado final.
+str(x_train[1,])
+# finalmente, vetorizando as etiquetas.
+y_train <- as.numeric(train_labels)
+y_test <- as.numeric(test_labels)
+# Construindo o modelo.
+model <- keras_model_sequential() %>%
+layer_dense(units = 16, activation = "relu", input_shape = c(freq)) %>%
+layer_dense(units = 16, activation = "relu") %>%
+layer_dense(units = 1, activation = "sigmoid")
+# Configurando a rede.
+model %>% compile(
+optimizer = "rmsprop",
+loss = "binary_crossentropy",
+metrics = c("accuracy")
+)
+# Validando
+# Vamos criar um conjunto de validação contendo 10.000 amostras do conjunto de treinamento.
+val_indices <- 1:freq
+x_val <- x_train[val_indices,]
+partial_x_train <- x_train[-val_indices,]
+y_val <- y_train[val_indices]
+partial_y_train <- y_train[-val_indices]
+# Vamos fazer o treinamento por 20 epochs, em mini-batches de 512 amostras.
+# Ao mesmo tempo, vamos monitorar perda e acurácia com nosso conjunto de validação.
+history <- model %>% fit(
+partial_x_train,
+partial_y_train,
+epochs = 20,
+batch_size = 512,
+validation_data = list(x_val, y_val)
+)
+# Visualizando os resultados.
+# Podemos ver um exemplo de 'overfitting', onde claramente o modelo vai sendo
+#     'otimizado' para o conjunto de treinamento (diferença de acurácia
+#     entre os dois conjuntos).
+plot(history)
+model <- keras_model_sequential() %>%
+layer_dense(units = 16, activation = "relu", input_shape = c(freq)) %>%
+layer_dense(units = 16, activation = "relu") %>%
+layer_dense(units = 1, activation = "sigmoid")
+model %>% compile(
+optimizer = "rmsprop",
+loss = "binary_crossentropy",
+metrics = c("accuracy")
+)
+model %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model %>% evaluate(x_test, y_test)
+# Verificando os resultados.
+results
+# Para terminar, vamos ver como usar o modelo treinado para avaliar a
+#    'positividade' de algumas análises.
+# Como pode ser visto, o modelo é bastante confiável para algumas análises,
+#     porém não muito para outras.
+model %>% predict(x_test[1:10,])
+# Carregando pacotes.
+library(keras)
+# Definindo conjuntos de treinamento e teste.
+dataset <- dataset_boston_housing()
+c(c(train_data, train_targets), c(test_data, test_targets)) %<-% dataset
+# Dando uma olhada no dados.
+str(train_data)
+str(test_data)
+# Os alvos são as medianas dos valores dos imóveis ocupados, em milhares de dólares.
+str(train_targets)
+# Os alvos são as medianas dos valores dos imóveis ocupados, em milhares de dólares.
+# Os valores estão entre $10,000 e $50,000 (estamos nos anos 1970 e com preços não-ajustados).
+str(train_targets)
+# Preparando ao dados via normalização.
+mean <- apply(train_data, 2, mean)
+std <- apply(train_data, 2, sd)
+train_data <- scale(train_data, center = mean, scale = std)
+test_data <- scale(test_data, center = mean, scale = std)
+# Montando o modelo.
+build_model <- function() {
+model <- keras_model_sequential() %>%
+layer_dense(units = 64, activation = "relu",
+input_shape = dim(train_data)[[2]]) %>%
+layer_dense(units = 64, activation = "relu") %>%
+layer_dense(units = 1)
+model %>% compile(
+optimizer = "rmsprop",
+loss = "mse",
+metrics = c("mae")
+)
+}
+# Como estamos em um problema de regressão, trabalharemos com uma única
+#     camada e sem função de ativação.
+# Também estamos usando MSE (Mean Squared Error) como função de perda,
+#     muito utlizada para regressões.
+# Finalmente, nossa métrica será a MAE (Mean Absolute Error), ou seja,
+#     a diferença absoluta entre predições e os alvos. Neste problema,
+#     um MAE de 0,5 indica um desvio dos alvos em aproximadamente $500.
+# Validando a abordagem usando K-fold validation.
+# Por termos uma amostra de dados pequena, não é muito prático usarmos
+#     conjuntos de teste e treinamento neste caso.
+# Vamos utilizar então a aborgem chamada 'k-fold' ('k-dobras').
+k <- 4
+indices <- sample(1:nrow(train_data))
+folds <- cut(indices, breaks = k, labels = FALSE)
+num_epochs <- 100
+all_scores <- c()
+for (i in 1:k) {
+cat("processando dobra #", i, "\n")
+# Preparando os dados de validação: dados da partição # k.
+val_indices <- which(folds == i, arr.ind = TRUE)
+val_data <- train_data[val_indices,]
+val_targets <- train_targets[val_indices]
+# Preparando os dados de treinamento: demais partições.
+partial_train_data <- train_data[-val_indices,]
+partial_train_targets <- train_targets[-val_indices]
+# Construindo o modelo.
+model <- build_model()
+# Treinando o modelo
+model %>% fit(partial_train_data, partial_train_targets,
+epochs = num_epochs, batch_size = 1, verbose = 0)
+# Evaluate the model on the validation data
+results <- model %>% evaluate(val_data, val_targets, verbose = 0)
+all_scores <- c(all_scores, results$mean_absolute_error)
+}
+# Apresentando resultados.
+all_scores
+# Média dos resultados.
+mean(all_scores)
+# Some memory clean-up
+k_clear_session()
+# Novo modelo.
+num_epochs <- 500
+all_mae_histories <- NULL
+for (i in 1:k) {
+cat("processing fold #", i, "\n")
+# Prepare the validation data: data from partition # k
+val_indices <- which(folds == i, arr.ind = TRUE)
+val_data <- train_data[val_indices,]
+val_targets <- train_targets[val_indices]
+# Prepare the training data: data from all other partitions
+partial_train_data <- train_data[-val_indices,]
+partial_train_targets <- train_targets[-val_indices]
+# Build the Keras model (already compiled)
+model <- build_model()
+# Train the model (in silent mode, verbose=0)
+history <- model %>% fit(
+partial_train_data, partial_train_targets,
+validation_data = list(val_data, val_targets),
+epochs = num_epochs, batch_size = 1, verbose = 0
+)
+mae_history <- history$metrics$val_mean_absolute_error
+all_mae_histories <- rbind(all_mae_histories, mae_history)
+}
+model %>% predict(test_data[1:10,])
+# Carregando pacotes
+library(keras)
+# Carregando a base e dividindo os conjuntos de teste e treinamento.
+# Temos os dados divididos em imagens e etiquetas que possuem correspondência 1-1.
+# O
+mnist <- dataset_mnist()
+train_images <- mnist$train$x
+train_labels <- mnist$train$y
+test_images <- mnist$test$x
+test_labels <- mnist$test$y
+# Vamos dar uma olhada no que temos no conjunto de treinamento.
+str(train_images)
+str(train_labels)
+# Agora, no conjunto de testes.
+str(test_images)
+str(test_labels)
+# Construindo o modelo.
+network <- keras_model_sequential() %>%
+layer_dense(units = 512, activation = "relu", input_shape = c(28 * 28)) %>%
+layer_dense(units = 10, activation = "softmax")
+# Mais definições para o modelo.
+network %>% compile(
+optimizer = "rmsprop",
+loss = "categorical_crossentropy",
+metrics = c("accuracy")
+)
+train_images <- array_reshape(train_images, c(60000, 28 * 28))
+train_images <- train_images / 255
+test_images <- array_reshape(test_images, c(10000, 28 * 28))
+test_images <- test_images / 255
+# Codificando apropriadamente as etiquetas dos dados.
+train_labels <- to_categorical(train_labels)
+test_labels <- to_categorical(test_labels)
+# Treinando o modelo
+# No keras isso é feito com a função 'fit'.
+# Lembrando que estamos usando apenas a CPU!
+# Duas informações são apresentadas durante o treinamento:
+#    - A 'perda' da rede em relação aos dados de treinamento.
+#    - A acurácia da rede em relação aos dados de treinamento.
+network %>% fit(train_images, train_labels, epochs = 5, batch_size = 128)
+# Vamos ver agora em relação ao conjunto de testes.
+metrics <- network %>% evaluate(test_images, test_labels, verbose = 0)
+metrics
+# Redes Neurais Artificiais
+# Exemplo 4
+# Exempo de aprendizagem não-supervisionada com Redes Neurais
+# e o algoritmo de Kohonen.
+# Base de características de vinhos
+# Instalando pacotes.
+#install.packages("kohonen")
+# Carregando os pacotes.
+library("kohonen")
+# Avaliando os dados.
+# <https://archive.ics.uci.edu/ml/datasets/wine>
+data("wines")
+str(wines)
+head(wines)
+View (wines)
+# Garantindo a reproducibilidade
+set.seed(1)
+# Aplicando o modelo de Kohonen.
+som.wines = som(scale(wines), grid = somgrid(5, 5, "hexagonal"))
+som.wines
+dim(getCodes(som.wines))
+# Visuaizando a variáveis relevantes e os agrupamentos.
+plot(som.wines, main = "Wine data Kohonen SOM")
+# Usando o modelo para previsão.
+# Vamos gerar uma base sintética para o exemplo.
+# Kohonen supervisionado.
+training = sample(nrow(wines), 150)
+Xtraining = scale(wines[training, ])
+View(Xtraining)
+View(Xtraining)
+Xtest = scale(wines[-training, ],
+center = attr(Xtraining, "scaled:center"),
+scale = attr(Xtraining, "scaled:scale"))
+View(Xtest)
+View(Xtest)
+5+5
+10-5
+45*3.5
+21/45
+34/0
+plot(1:10)
+q()
+val_x <- 15
+plot(1:val_x)
+plogis(
+3560835085
+;
+plo
+plot(x = )
+?plot
+help(plot)
+# Matriz Var-Covar
+Sigma <- matrix(c(10,3,3,2), nrow = 2, ncol = 2)
+# Médias
+mu <- c(1, 10)
+#Gera 100 observações
+x <- mvrnorm(n = 100, mu, Sigma)
+library(MASS)
+#Gera 100 observações
+x <- mvrnorm(n = 100, mu, Sigma)
+search()
+detach(package:MASS)
+search()
+install.packages("dplyr")
+setwd("D:/Dropbox/01 - Infnet/73 - Big Data Analytics (MBA)/2019 (T1 - Sábados)/Arquivos Etapa 03b")
+install.packages("arules", dependencies=TRUE)
+install.packages("arulesViz", dependencies=TRUE)
+# Instalando os pacotes
+library(arules)
+library(arulesViz)
+install.packages("Rcpp", dependencies=TRUE)
+# Instalando os pacotes
+library(arules)
+library(arulesViz)
+# Carregando o conjunto de dados.
+groceries <- read.transactions(file = 'groceries.txt', sep = ',', rm.duplicates = T)
+summary(groceries)
+# Observando algumas transações.
+# Cada linha da matriz representa uma cesta de compras.
+inspect(groceries[1:4])
+# Calculando o suporte para cada item e imprimindo gráfico de itens e seus suportes.
+itemFrequency(groceries[,1:169])
+itemFrequencyPlot(groceries[,1:169])
+#Visualizando gráfico de itens com suporte > 0,1.
+itemFrequencyPlot(groceries, support = 0.1)
+# Mais um gráfico, agora alterando os eixos.
+itens <- itemFrequency(groceries)
+itens <- itens[order(itens, decreasing = T)] # Ordenando os itens.
+dotchart(itens)
+# Mesmos gráficos, menos itens.
+# Pegando os 10 itens mais negociados.
+dotchart(itens[1:10], cex = 0.8)
+itemFrequencyPlot(groceries, topN=10)
+# Usando o algoritmos Apriori para descobrir as regras de associação.
+regras <- apriori(groceries, parameter = list(support=0.001, confidence=0.5, minlen = 2))
+# Verificando as regras.
+summary(regras)
+# Inspecionando as regras e ordenando-as por confiança e lift.
+inspect(regras[1:10])
+inspect(sort(regras[1:50], by = 'confidence'))
+inspect(sort(regras[1:50], by = 'lift'))
+# Visualizando as regras como um diagrama de dispersão.
+plot(regras, method = 'scatterplot', shading=NA)
+# Selecionando regras com confiança > 0,8.
+subregras <- regras[quality(regras)$confidence > 0.8]
+# Visualizando as regras em um gráfico suporte x confiança + ordem.
+plot(subregras, method = 'two-key plot', shading=NA)
+# Fazendo o gráfico de dispersão suporte por lift.
+plot(regras, measure=c("support", "lift"), shading="confidence")
+# Visualizando regras agrupadas.
+plot(subregras, method="grouped", control = list(k=40), cex = 0.7)
+# Visualizando regras como grafo. Apresentação interativa.
+subregras2 <- head(sort(regras, by="lift"), 10)
+plot(subregras2, method="graph", interactive=T, control=list(type="items", measureLabels=T, arrowSize=0.2, alpha=1, cex=0.9))
+plot(subregras2, method="graph", engine=interactive, control=list(type="items", measureLabels=T, arrowSize=0.2, alpha=1, cex=0.9))
